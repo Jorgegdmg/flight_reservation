@@ -1,9 +1,20 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
+using FlightData.Data;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Añadimos swagger para tener documentacion del proyecto
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen( c => {
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "Flight API",
+        Version = "v1",
+        Description = "Api para gestionar vuelos, pasajeros y reservas"
+    });
+});
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -18,8 +29,16 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "Flight API v1");
+        c.RoutePrefix = string.Empty; // sirve Swagger en la raíz
     });
 }
+
+// Cadena de conexión SQLite
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlite(builder.Configuration
+       .GetConnectionString("DefaultConnection") ??
+       "Data Source=FlightDb.db")
+);
 
 app.UseHttpsRedirection();
 
