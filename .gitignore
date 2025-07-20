@@ -1,0 +1,32 @@
+# -----------------------
+# Backend (.NET 7)
+# -----------------------
+# Compiled object files
+**/bin/
+**/obj/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Visual Studio folders
+.vs/
+
+# -----------------------
+# Frontend (Angular/Node)
+# -----------------------
+# Node modules
+flight-app/node_modules/
+
+# Build output
+flight-app/dist/
+flight-app/out-tsc/
+
+# IDE or Editor folders
+.idea/
+.vscode/
+
+# Environment variables
+.env
