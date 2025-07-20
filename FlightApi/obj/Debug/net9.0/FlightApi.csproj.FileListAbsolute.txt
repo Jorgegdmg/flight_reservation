@@ -33,3 +33,4 @@ D:\proyectos_.net\proyecto_reserva_vuelos\flight-reservation\FlightApi\obj\Debug
 D:\proyectos_.net\proyecto_reserva_vuelos\flight-reservation\FlightApi\bin\Debug\net9.0\Swashbuckle.AspNetCore.Swagger.dll
 D:\proyectos_.net\proyecto_reserva_vuelos\flight-reservation\FlightApi\bin\Debug\net9.0\Swashbuckle.AspNetCore.SwaggerGen.dll
 D:\proyectos_.net\proyecto_reserva_vuelos\flight-reservation\FlightApi\bin\Debug\net9.0\Swashbuckle.AspNetCore.SwaggerUI.dll
+D:\proyectos_.net\proyecto_reserva_vuelos\flight-reservation\FlightApi\obj\Debug\net9.0\FlightApi.sourcelink.json
