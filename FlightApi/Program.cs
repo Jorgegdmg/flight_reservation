@@ -20,6 +20,15 @@ builder.Services.AddSwaggerGen( c => {
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
+
+
+// Cadena de conexión SQLite
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlite(builder.Configuration
+       .GetConnectionString("DefaultConnection") ??
+       "Data Source=FlightDb.db")
+);
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -32,13 +41,6 @@ if (app.Environment.IsDevelopment())
         c.RoutePrefix = string.Empty; // sirve Swagger en la raíz
     });
 }
-
-// Cadena de conexión SQLite
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite(builder.Configuration
-       .GetConnectionString("DefaultConnection") ??
-       "Data Source=FlightDb.db")
-);
 
 app.UseHttpsRedirection();
 

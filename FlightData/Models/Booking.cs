@@ -7,9 +7,9 @@ namespace FlightData.Models
     {
         public int Id { get; set; }
         public int FlightId { get; set; }
-        public Flight Flight { get; set; } = null!;
+        public Flight Flight { get; set; } = default!;
         public int PassengerId { get; set; }
-        public Passenger Passenger { get; set; } = null!;
-        public string SeatNumber { get; set; } = null!;
+        public Passenger Passenger { get; set; } = default!;
+        public string SeatNumber { get; set; } = default!;
     }
 }
