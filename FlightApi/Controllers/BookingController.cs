@@ -8,11 +8,11 @@ namespace FlightApi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class BookingController : ControllerBase
+    public class BookingsController : ControllerBase
     {
         private readonly AppDbContext _context;
 
-        public BookingController(AppDbContext context)
+        public BookingsController(AppDbContext context)
         {
             _context = context;
         }
@@ -68,17 +68,17 @@ namespace FlightApi.Controllers
         public async Task<ActionResult<BookingDto>> CreateBooking(CreateBookingDto dto)
         {
             // Validamos la existencia del vuelo y del pasajero
-            var flightExists = await _context.Flights.AnyAsync(f => f.Id == dto.FlightId);
-            if (!flightExists) return BadRequest($"El vuelo con id {dto.FlightId} no existe.");
+            var flightExists = await _context.Flights.AnyAsync(f => f.Id == dto.FlightId!.Value);
+            if (!flightExists) return BadRequest($"El vuelo con id {dto.FlightId!.Value} no existe.");
 
-            var passengerExists = await _context.Passengers.AnyAsync(p => p.Id == dto.PassengerId);
-            if (!passengerExists) return BadRequest($"El pasajero con id {dto.PassengerId} no existe.");
+            var passengerExists = await _context.Passengers.AnyAsync(p => p.Id == dto.PassengerId!.Value);
+            if (!passengerExists) return BadRequest($"El pasajero con id {dto.PassengerId!.Value} no existe.");
 
             // Creamos la reserva (mapeamos el DTO)
             var booking = new Booking
             {
-                FlightId = dto.FlightId,
-                PassengerId = dto.PassengerId,
+                FlightId = dto.FlightId!.Value,
+                PassengerId = dto.PassengerId!.Value,
                 SeatNumber = dto.SeatNumber
             };
 
@@ -107,22 +107,22 @@ namespace FlightApi.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<BookingDto>> UpdateBooking(int id, CreateBookingDto dto)
+        public async Task<IActionResult> UpdateBooking(int id, CreateBookingDto dto)
         {
             // Buscamos la reserva
             var booking = await _context.Bookings.FindAsync(id);
             if (booking == null) return NotFound();
 
             // Validaciones
-            if (!await _context.Flights.AnyAsync(f => f.Id == dto.FlightId))
-                return BadRequest($"El vuelo con el id {dto.FlightId} no existe.");
+            if (!await _context.Flights.AnyAsync(f => f.Id == dto.FlightId!.Value))
+                return BadRequest($"El vuelo con el id {dto.FlightId!.Value} no existe.");
 
-            if (!await _context.Passengers.AnyAsync(p => p.Id == dto.PassengerId))
-                return BadRequest($"El pasajero con el id {dto.PassengerId} no existe.");
+            if (!await _context.Passengers.AnyAsync(p => p.Id == dto.PassengerId!.Value))
+                return BadRequest($"El pasajero con el id {dto.PassengerId!.Value} no existe.");
 
             // Si la encontramos hacemos el update
-            booking.FlightId = dto.FlightId;
-            booking.PassengerId = dto.PassengerId;
+            booking.FlightId = dto.FlightId!.Value;
+            booking.PassengerId = dto.PassengerId!.Value;
             booking.SeatNumber = dto.SeatNumber;
 
             // Guardamos en BBDD
@@ -133,7 +133,7 @@ namespace FlightApi.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<ActionResult<BookingDto>> DeleteBooking(int id)
+        public async Task<IActionResult> DeleteBooking(int id)
         {
             // Buscamos la reserva
             var booking = await _context.Bookings.FindAsync(id);
