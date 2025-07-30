@@ -46,7 +46,7 @@ namespace FlightApi.Controllers
             var b = await _context.Bookings
                 .Include(bk => bk.Passenger)
                 .FirstOrDefaultAsync(bk => bk.Id == id);
-                
+
             if (b == null) return NotFound();
 
             // Si la encontramos la devolvemos
@@ -148,6 +148,10 @@ namespace FlightApi.Controllers
             // Devolvemos OK
             return NoContent();
         }
+        
+        [HttpGet("error")]
+        public IActionResult ThrowError() => throw new Exception("Prueba de middleware de errores");
+
 
 
 
