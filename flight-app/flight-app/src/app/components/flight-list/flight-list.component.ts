@@ -1,31 +1,11 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FlightService, Flight } from '../../services/flight.service';
+import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-flight-list',
-  standalone: true,
-  imports: [CommonModule],
+  standalone: false,
   templateUrl: './flight-list.component.html',
-  styleUrls: ['./flight-list.component.scss']
+  styleUrl: './flight-list.component.scss'
 })
-export class FlightListComponent implements OnInit {
-  flights: Flight[] = [];
-  loading = true;
-  error = '';
+export class FlightListComponent {
 
-  constructor(private flightService: FlightService) {}
-
-  ngOnInit(): void {
-    this.flightService.getFlights().subscribe({
-      next: data => {
-        this.flights = data;
-        this.loading = false;
-      },
-      error: () => {
-        this.error = 'Error al cargar vuelos';
-        this.loading = false;
-      }
-    });
-  }
 }
