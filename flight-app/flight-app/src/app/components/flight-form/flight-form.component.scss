@@ -1,0 +1,64 @@
+.flight-search-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+
+  .form-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  &--options {
+    .radio-group,
+    .select-group,
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .radio-group label {
+      cursor: pointer;
+    }
+  }
+
+  &--fields {
+    .field-group {
+      flex: 1;
+      input, select {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+    }
+  }
+
+  &--actions {
+    justify-content: flex-end;
+    button {
+      min-width: 120px;
+      padding: 0.6rem 1rem;
+      border-radius: 20px;
+      border: none;
+      cursor: pointer;
+    }
+    .btn-secondary {
+      background: transparent;
+      border: 1px solid #007aff;
+      color: #007aff;
+    }
+    .btn-primary {
+      background: #007aff;
+      color: white;
+    }
+    button + button {
+      margin-left: 0.5rem;
+    }
+  }
+
+  .form-error {
+    color: red;
+    font-size: 0.9rem;
+  }
+}

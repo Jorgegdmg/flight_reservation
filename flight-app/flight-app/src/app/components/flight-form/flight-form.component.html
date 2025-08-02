@@ -1,1 +1,64 @@
-<p>flight-form works!</p>
+<form class="flight-search-form">
+  <!-- Fila superior: tipo de vuelo, clase y directo -->
+  <div class="form-row form-row--options">
+    <div class="radio-group">
+      <label>
+        <input type="radio" name="tripType" value="roundtrip" checked />
+        Ida y vuelta
+      </label>
+      <label>
+        <input type="radio" name="tripType" value="oneway" />
+        Solo ida
+      </label>
+      <label>
+        <input type="radio" name="tripType" value="multi" />
+        Múltiples destinos
+      </label>
+    </div>
+    <div class="select-group">
+      <select name="cabinClass">
+        <option value="economy">Turista</option>
+        <option value="premium">Turista Superior</option>
+        <option value="business">Business</option>
+        <option value="first">Primera</option>
+      </select>
+    </div>
+    <div class="checkbox-group">
+      <label>
+        <input type="checkbox" name="directOnly" />
+        Vuelos directos
+      </label>
+    </div>
+  </div>
+
+  <!-- Fila intermedia: origen, destino, fechas y viajeros -->
+  <div class="form-row form-row--fields">
+    <div class="field-group">
+      <input type="text" name="origin" placeholder="¿Desde dónde sales?" />
+    </div>
+    <div class="field-group">
+      <input type="text" name="destination" placeholder="¿A dónde vas?" />
+    </div>
+    <div class="field-group">
+      <input type="date" name="departureDate" />
+    </div>
+    <div class="field-group">
+      <input type="date" name="returnDate" />
+    </div>
+    <div class="field-group">
+      <select name="passengers">
+        <option value="1">1 pasajero</option>
+        <option value="2">2 pasajero</option>
+        <option value="3">3 pasajero</option>
+        <option value="4">4 pasajero</option>
+        <option value="5">5 pasajero</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Fila inferior: acciones -->
+  <div class="form-row form-row--actions">
+    <button type="button" class="btn-secondary">Buscar Vuelo + Hotel</button>
+    <button type="submit" class="btn-primary">Buscar vuelos</button>
+  </div>
+</form>
