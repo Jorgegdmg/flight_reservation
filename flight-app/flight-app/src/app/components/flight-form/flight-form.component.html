@@ -1,31 +1,30 @@
-<form class="flight-search-form">
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="flight-search-form">
   <!-- Fila superior: tipo de vuelo, clase y directo -->
   <div class="form-row form-row--options">
     <div class="radio-group">
       <label>
-        <input type="radio" name="tripType" value="roundtrip" checked />
+        <input type="radio" formControlName="tripType" value="roundtrip" checked />
         Ida y vuelta
       </label>
       <label>
-        <input type="radio" name="tripType" value="oneway" />
+        <input type="radio" formControlName="tripType" value="oneway" />
         Solo ida
       </label>
       <label>
-        <input type="radio" name="tripType" value="multi" />
+        <input type="radio" formControlName="tripType" value="multi" />
         Múltiples destinos
       </label>
     </div>
     <div class="select-group">
-      <select name="cabinClass">
-        <option value="economy">Turista</option>
-        <option value="premium">Turista Superior</option>
-        <option value="business">Business</option>
-        <option value="first">Primera</option>
+      <select formControlName="cabinClass">
+        <option *ngFor="let f of ['Turista','Turista Superior','Business','Primera']" [value]="f">
+          {{f}}
+        </option>
       </select>
     </div>
     <div class="checkbox-group">
       <label>
-        <input type="checkbox" name="directOnly" />
+        <input type="checkbox" formControlName="directOnly" />
         Vuelos directos
       </label>
     </div>
@@ -34,31 +33,47 @@
   <!-- Fila intermedia: origen, destino, fechas y viajeros -->
   <div class="form-row form-row--fields">
     <div class="field-group">
-      <input type="text" name="origin" placeholder="¿Desde dónde sales?" />
+      <input type="text" formControlName="origin" placeholder="¿Desde dónde sales?" />
+
+        <div class="form-error" [hidden]="origin?.valid || origin?.pristine">
+          <span *ngIf="form.get('origin')?.errors?.['required']">
+            El origen es obligatorio.
+          </span>
+        </div>
+
     </div>
     <div class="field-group">
-      <input type="text" name="destination" placeholder="¿A dónde vas?" />
+      <input type="text" formControlName="destination" placeholder="¿A dónde vas?" />
+        <div *ngIf="form.get('destination')!.touched && form.get('destination')!.errors!" class="form-error">
+          El origen es obligatorio.
+        </div>
     </div>
     <div class="field-group">
-      <input type="date" name="departureDate" />
+      <input type="date" formControlName="departureDate" />
+        <div *ngIf="form.get('departureDate')!.touched && form.get('departureDate')!.errors!" class="form-error">
+          La fecha de ida es obligatoria.
+        </div>
     </div>
     <div class="field-group">
-      <input type="date" name="returnDate" />
+      <input type="date" formControlName="returnDate" id="fechaVuelta" />
+        <div *ngIf="form.get('returnDate')!.touched && form.get('returnDate')!.errors!" class="form-error">
+          La fecha de vuelta es obligatoria.
+        </div>
     </div>
     <div class="field-group">
-      <select name="passengers">
-        <option value="1">1 pasajero</option>
-        <option value="2">2 pasajero</option>
-        <option value="3">3 pasajero</option>
-        <option value="4">4 pasajero</option>
-        <option value="5">5 pasajero</option>
+      <select formControlName="passengers">
+        <option *ngFor="let n of [1,2,3,4,5]" [value]="n">
+          {{n}} Pasajero{{ n > 1 ? 's' : '' }}
+        </option>
       </select>
     </div>
   </div>
 
   <!-- Fila inferior: acciones -->
   <div class="form-row form-row--actions">
-    <button type="button" class="btn-secondary">Buscar Vuelo + Hotel</button>
     <button type="submit" class="btn-primary">Buscar vuelos</button>
   </div>
+
+  <!-- Mensaje de error -->
+
 </form>

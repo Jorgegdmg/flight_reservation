@@ -9,7 +9,7 @@
     gap: 0.5rem;
   }
 
-  &--options {
+ .form-row--options {
     .radio-group,
     .select-group,
     .checkbox-group {
@@ -22,7 +22,7 @@
     }
   }
 
-  &--fields {
+  .form-row--fields {
     .field-group {
       flex: 1;
       input, select {
@@ -34,7 +34,7 @@
     }
   }
 
-  &--actions {
+  .form-row--actions {
     justify-content: flex-end;
     button {
       min-width: 120px;
@@ -42,6 +42,7 @@
       border-radius: 20px;
       border: none;
       cursor: pointer;
+      
     }
     .btn-secondary {
       background: transparent;
@@ -58,7 +59,7 @@
   }
 
   .form-error {
-    color: red;
+    color: #ff0000;
     font-size: 0.9rem;
   }
 }
