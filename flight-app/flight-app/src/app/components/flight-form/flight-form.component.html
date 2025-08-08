@@ -17,8 +17,8 @@
     </div>
     <div class="select-group">
       <select formControlName="cabinClass">
-        <option *ngFor="let f of ['Turista','Turista Superior','Business','Primera']" [value]="f">
-          {{f}}
+        <option *ngFor="let f of cabinClasses" [value]="f.value">
+          {{f.label}}
         </option>
       </select>
     </div>
@@ -34,24 +34,26 @@
   <div class="form-row form-row--fields">
     <div class="field-group">
       <input type="text" formControlName="origin" placeholder="¿Desde dónde sales?" />
-
-        <div class="form-error" [hidden]="origin?.valid || origin?.pristine">
-          <span *ngIf="form.get('origin')?.errors?.['required']">
-            El origen es obligatorio.
-          </span>
-        </div>
-
+      <div *ngIf="form.get('origin')!.touched && form.get('origin')!.errors!" class="form-error">
+        El origen es obligatorio.
+      </div>
     </div>
     <div class="field-group">
       <input type="text" formControlName="destination" placeholder="¿A dónde vas?" />
-        <div *ngIf="form.get('destination')!.touched && form.get('destination')!.errors!" class="form-error">
-          El origen es obligatorio.
-        </div>
+      <div *ngIf="form.get('destination')!.touched && form.get('destination')!.errors!" class="form-error">
+        El destino es obligatorio.
+      </div>
+      <div *ngIf="form.errors?.['origenIgualDestino'] && form.touched" class="form-error">
+        El origen y el destino no pueden ser iguales.
+      </div>
     </div>
     <div class="field-group">
       <input type="date" formControlName="departureDate" />
         <div *ngIf="form.get('departureDate')!.touched && form.get('departureDate')!.errors!" class="form-error">
           La fecha de ida es obligatoria.
+        </div>
+        <div *ngIf="form.errors?.['fechaNoValida'] && form.touched" class="form-error">
+          La fecha no puede ser anterior a hoy.
         </div>
     </div>
     <div class="field-group">
@@ -59,12 +61,18 @@
         <div *ngIf="form.get('returnDate')!.touched && form.get('returnDate')!.errors!" class="form-error">
           La fecha de vuelta es obligatoria.
         </div>
+        <div *ngIf="form.errors?.['llegadaNoValida'] && form.touched " class="form-error">
+          La llegada no puede ser anterior a la salida.
+        </div>
     </div>
     <div class="field-group">
       <select formControlName="passengers">
         <option *ngFor="let n of [1,2,3,4,5]" [value]="n">
           {{n}} Pasajero{{ n > 1 ? 's' : '' }}
         </option>
+        <div *ngIf="form.get('passengers')?.value < 1 || form.get('passengers')?.value > 5" class="form-error">
+          El nº de pasajeros debe estar entre 1 y 5
+        </div>
       </select>
     </div>
   </div>

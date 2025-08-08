@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { origenDestinoDiferentes, idaAlPasado, vueltaSuperiorIda } from '../../helpers/validaciones';
 
 @Component({
   selector: 'app-flight-form',
@@ -7,7 +8,7 @@ import { FormGroup, FormBuilder, ReactiveFormsModule, Validators } from '@angula
   templateUrl: './flight-form.component.html',
   styleUrl: './flight-form.component.scss'
 })
-export class FlightFormComponent {
+export class FlightFormComponent implements OnInit {
   
   form!: FormGroup;
   
@@ -16,13 +17,15 @@ export class FlightFormComponent {
   ngOnInit(): void {
     this.form = this.fb.group({
       tripType: ['roundtrip'],
-      cabinClass: ['turista'],
+      cabinClass: ['economy'],
       directOnly: [false],
       origin: ['', [Validators.required, Validators.minLength(3)]],
       destination: ['', [Validators.required, Validators.minLength(3)]],
       departureDate: ['', Validators.required],
       returnDate: [''],
       passengers: [1]
+    },{
+      validators: [origenDestinoDiferentes, idaAlPasado, vueltaSuperiorIda]
     });
 
     this.form.get('tripType')!.valueChanges.subscribe(type =>{
@@ -45,7 +48,7 @@ export class FlightFormComponent {
   }
 
   get origin() {
-    return this.form.value.origin;
+    return this.form.get('origin');
   }
 
   onSubmit(): void {
@@ -56,6 +59,11 @@ export class FlightFormComponent {
     }
   }
 
-
+  cabinClasses = [
+    {label: 'Turista', value: 'economy'},
+    {label: 'Turista Superior', value: 'premium'},
+    {label: 'Business', value: 'business'},
+    {label: 'Primera', value: 'first'}
+  ]
 
 }
