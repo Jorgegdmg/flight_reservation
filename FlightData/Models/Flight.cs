@@ -12,7 +12,6 @@ namespace FlightData.Models
         public int Capacity { get; set; } = default!;
         public bool IsDirect { get; set; } = true;
         public string CabinClass { get; set; } = default!;
-        public int Pasengers { get; set; } = default!;
         public string TripType { get; set; } = default!;
 
 
