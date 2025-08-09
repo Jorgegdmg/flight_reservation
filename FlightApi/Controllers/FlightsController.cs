@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using FlightData.Data;
-using FlightData.Models;      // si lo necesitas para el modelo
-using FlightApi.DTOs;         // <-- añade esto
+using FlightData.Models;
+using FlightApi.DTOs;
 
 namespace FlightApi.Controllers
 {
@@ -47,6 +47,47 @@ namespace FlightApi.Controllers
                 Destination = flight.Destination,
                 DepartureTime = flight.DepartureTime
             };
+        }
+
+        [HttpGet("search")]
+        public async Task<ActionResult<FlightDto>> Search(
+            string? origin = null,
+            string? destination = null,
+            DateTime? departureDate = null,
+            DateTime? returnDate = null,
+            string? tripType = null,
+            int? passengers = null,
+            bool? directOnly = null,
+            string? cabinClass = null)
+        {
+ 
+            var baseQuery = _context.Flights.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(origin))
+            {
+                baseQuery = baseQuery.Where(f => EF.Functions.Like(f.Origin, $"%{origin}%"));
+            }
+            if (!string.IsNullOrWhiteSpace(destination))
+            {
+                baseQuery = baseQuery.Where(f => EF.Functions.Like(f.Destination, $"%{destination}%"));
+            }
+            if (departureDate.HasValue)
+            {
+                var d = departureDate.Value.Date;
+                baseQuery = baseQuery.Where(f => f.DepartureTime >= d && f.DepartureTime < d.AddDays(1));
+            }
+            if (returnDate.HasValue)
+            {
+                baseQuery = baseQuery.Where(f => f.DepartureTime.Date == returnDate.Value.Date);
+            }
+            if (directOnly == true)
+            {
+                baseQuery = baseQuery.Where(f => f.IsDirect);
+            }
+
+
+
+            return null;
         }
 
         /*
