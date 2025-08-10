@@ -32,6 +32,24 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 var app = builder.Build();
 
+/*    Borrar cuando se terminen las pruebas
+using (var scope = app.Services.CreateScope())
+{
+    var ctx = scope.ServiceProvider.GetRequiredService<FlightData.Data.AppDbContext>();
+
+    // Asegúrate de que la columna Capacity existe en la BD (si no, hará falta migración).
+    // Actualiza filas antiguas con Capacity NULL/0 a 180
+    await ctx.Database.ExecuteSqlRawAsync(
+        "UPDATE Flights SET Capacity = 180 WHERE Capacity IS NULL OR Capacity = 0;"
+    );
+
+    // opcional: log
+    var updated = await ctx.Flights.CountAsync(f => f.Capacity == 180);
+    Console.WriteLine($"Flights with capacity=180: {updated}");
+}
+*/
+
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {

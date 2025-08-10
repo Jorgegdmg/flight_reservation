@@ -7,9 +7,8 @@ namespace FlightApi.DTOs
         public string Destination { get; set; } = default!;
         public DateTime DepartureTime { get; set; }
         public int Capacity { get; set; } = default!;
-        public int Availableseats { get; set; } = default!;
+        public int AvailableSeats { get; set; } = default!;
         public bool IsDirect { get; set; } = true;
         public string CabinClass { get; set; } = default!;
-        public string TripType { get; set; } = default!;
     }
 }

@@ -14,5 +14,11 @@ namespace FlightApi.DTOs
 
         [Required(ErrorMessage = "La hora de salida es obligatoria.")]
         public DateTime DepartureTime { get; set; }
+
+        [Range(1,1000)]
+        public int Capacity { get; set; } = 180;
+        public bool IsDirect { get; set; } = true;
+        [Required]        
+        public string CabinClass { get; set; } = default!;
     }
 }

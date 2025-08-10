@@ -26,13 +26,25 @@ namespace FlightApi.Controllers
                 {
                     Id = f.Id,
                     Origin = f.Origin,
+                    Destination = f.Destination,
                     DepartureTime = f.DepartureTime,
-                    Destination = f.Destination
+                    Capacity = f.Capacity,
+                    AvailableSeats = f.Capacity - f.Bookings.Count(), // calculado
+                    IsDirect = f.IsDirect,
+                    CabinClass = f.CabinClass
                 })
                 .ToListAsync();
 
             return Ok(flights);
         }
+
+        [HttpGet("debug/count")]
+        public async Task<ActionResult> Count()
+        {
+            var total = await _context.Flights.CountAsync();
+            return Ok(new { total });
+        }
+
 
         [HttpGet("{id}")]
         public async Task<ActionResult<FlightDto>> GetFlight(int id)
@@ -45,7 +57,11 @@ namespace FlightApi.Controllers
                 Id = flight.Id,
                 Origin = flight.Origin,
                 Destination = flight.Destination,
-                DepartureTime = flight.DepartureTime
+                DepartureTime = flight.DepartureTime,
+                Capacity = flight.Capacity,
+                AvailableSeats = flight.Capacity - flight.Bookings.Count(), // calculado
+                IsDirect = flight.IsDirect,
+                CabinClass = flight.CabinClass
             };
         }
 
@@ -86,7 +102,7 @@ namespace FlightApi.Controllers
             }
             if (!string.IsNullOrWhiteSpace(cabinClass))
             {
-                baseQuery = baseQuery.Where(f => EF.Functions.Like(f.CabinClass, $"%{cabinClass}%"));
+                baseQuery = baseQuery.Where(f => f.CabinClass == cabinClass);
             }
 
             var outboundQuery = baseQuery.OrderBy(f => f.DepartureTime).Take(10);
@@ -98,10 +114,10 @@ namespace FlightApi.Controllers
                             Origin = f.Origin,
                             Destination = f.Destination,
                             DepartureTime = f.DepartureTime,
-                            Availableseats = f.Capacity - f.Bookings.Count()
+                            AvailableSeats = f.Capacity - f.Bookings.Count()
                         }).ToListAsync();
 
-            if (tripType == "roundtrip" && returnDate.HasValue)
+            if (string.Equals(tripType, "roundtrip", StringComparison.OrdinalIgnoreCase) && returnDate.HasValue)
             {
                 var returnQuery = _context.Flights.AsQueryable();
 
@@ -123,7 +139,7 @@ namespace FlightApi.Controllers
                 }
                 if (!string.IsNullOrWhiteSpace(cabinClass))
                 {
-                    returnQuery = returnQuery.Where(f => EF.Functions.Like(f.CabinClass, $"%{cabinClass}%"));
+                    returnQuery = returnQuery.Where(f => f.CabinClass == cabinClass);
                 }
 
                 var rd = returnDate.Value.Date;
@@ -138,7 +154,7 @@ namespace FlightApi.Controllers
                                 Origin = f.Origin,
                                 Destination = f.Destination,
                                 DepartureTime = f.DepartureTime,
-                                Availableseats = f.Capacity - f.Bookings.Count()
+                                AvailableSeats = f.Capacity - f.Bookings.Count()
                             }).ToListAsync();
 
                 if (inbound != null)
@@ -150,17 +166,34 @@ namespace FlightApi.Controllers
         [HttpPost]
         public async Task<ActionResult<FlightDto>> CreateFlight(CreateFlightDto dto)
         {
+
+            // Validaciones
+            if (!ModelState.IsValid) 
+                return BadRequest(ModelState);
+            if (dto.DepartureTime < DateTime.UtcNow)
+                return BadRequest("La fecha de salida no puede ser anterior al momento actual.");
+
+            // Asignar capacity por defecto si el cliente no lo puso (opcional)
+            var capacity = dto.Capacity > 0 ? dto.Capacity : 180;
+
+
             // Mapeamos dto -> Entidad
             var flight = new Flight
             {
                 Origin = dto.Origin,
                 Destination = dto.Destination,
-                DepartureTime = dto.DepartureTime
+                DepartureTime = dto.DepartureTime,
+                Capacity = capacity,
+                IsDirect = dto.IsDirect,
+                CabinClass = dto.CabinClass
             };
 
             // Lo añadimos y gardamos
             _context.Flights.Add(flight);
             await _context.SaveChangesAsync();
+
+            // Calcular available seats (normalmente sin bookings => capacity)
+            var availableSeats = capacity - await _context.Bookings.CountAsync(b => b.FlightId == flight.Id);
 
             // Mapear Entidad -> Dto de respuesta
             var result = new FlightDto
@@ -168,7 +201,10 @@ namespace FlightApi.Controllers
                 Id = flight.Id,
                 Origin = flight.Origin,
                 Destination = flight.Destination,
-                DepartureTime = flight.DepartureTime
+                DepartureTime = flight.DepartureTime,
+                AvailableSeats = availableSeats,
+                IsDirect = dto.IsDirect,
+                CabinClass = dto.CabinClass
             };
 
             // Devolvemos OK!
@@ -187,6 +223,9 @@ namespace FlightApi.Controllers
             flight.Origin = dto.Origin;
             flight.Destination = dto.Destination;
             flight.DepartureTime = dto.DepartureTime;
+            flight.Capacity = dto.Capacity;
+            flight.IsDirect = dto.IsDirect;
+            flight.CabinClass = dto.CabinClass;
 
             // Guardamos los cambios en la bbdd
             await _context.SaveChangesAsync();

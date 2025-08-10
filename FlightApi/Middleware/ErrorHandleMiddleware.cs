@@ -38,27 +38,8 @@ namespace FlightApi.Middlewares
 
             }
 
-
-
         }
 
-
-
-
-
-
-
-
-
     }
-
-
-
-
-
-
-
-
-
 
 }
