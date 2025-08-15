@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using FlightData.Data;
 using FlightData.Models;
 using FlightApi.DTOs;
+using FlightApi.Utils;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace FlightApi.Controllers
 {
@@ -11,10 +13,12 @@ namespace FlightApi.Controllers
     public class FlightsController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly IValidaciones _validaciones;
 
-        public FlightsController(AppDbContext context)
+        public FlightsController(AppDbContext context, IValidaciones validaciones)
         {
             _context = context;
+            _validaciones = validaciones;
         }
 
         // CRUD
@@ -71,13 +75,30 @@ namespace FlightApi.Controllers
             string? destination = null,
             DateTime? departureDate = null,
             DateTime? returnDate = null,
-            string? tripType = null,
+            string tripType = "roundtrip",
             int? passengers = null,
             bool? directOnly = null,
             string? cabinClass = null)
         {
  
+            var request = new SearchRequest
+            {
+                Origin = origin,
+                Destination = destination,
+                DepartureDate = departureDate,
+                ReturnDate = returnDate,
+                Passengers = passengers,
+                DirectOnly = directOnly,
+                CabinClass = cabinClass
+            };
+
+            if (!_validaciones.IsAValidSearch(request))
+            {
+                return BadRequest("Parámetros inválidos.");
+            }
+
             var baseQuery = _context.Flights.AsQueryable();
+
 
             if (!string.IsNullOrWhiteSpace(origin))
             {
@@ -114,10 +135,11 @@ namespace FlightApi.Controllers
                             Origin = f.Origin,
                             Destination = f.Destination,
                             DepartureTime = f.DepartureTime,
-                            AvailableSeats = f.Capacity - f.Bookings.Count()
+                            AvailableSeats = f.Capacity - f.Bookings.Count(),
+                            CabinClass = f.CabinClass
                         }).ToListAsync();
 
-            if (string.Equals(tripType, "roundtrip", StringComparison.OrdinalIgnoreCase) && returnDate.HasValue)
+            if (string.Equals(tripType, "roundtrip", StringComparison.OrdinalIgnoreCase))
             {
                 var returnQuery = _context.Flights.AsQueryable();
 
@@ -144,6 +166,7 @@ namespace FlightApi.Controllers
 
                 var rd = returnDate.Value.Date;
                 returnQuery = returnQuery.Where(f => f.DepartureTime >= rd && f.DepartureTime < rd.AddDays(1));
+                
 
                 var inboundQuery = returnQuery.OrderBy(f => f.DepartureTime).Take(10);
 
@@ -155,6 +178,81 @@ namespace FlightApi.Controllers
                                 Destination = f.Destination,
                                 DepartureTime = f.DepartureTime,
                                 AvailableSeats = f.Capacity - f.Bookings.Count()
+                            }).ToListAsync();
+
+                if (inbound != null)
+                    return Ok(new { outbound, inbound });
+            }
+            return Ok(new { outbound });
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<object>> FlightSearchSearch(
+            string? origin = null,
+            string? destination = null,
+            DateTime? departureDate = null,
+            DateTime? returnDate = null,
+            string tripType = "roundtrip",
+            int? passengers = null,
+            bool? directOnly = null,
+            string? cabinClass = null)
+        {
+
+            var request = new SearchRequest
+            {
+                Origin = origin,
+                Destination = destination,
+                DepartureDate = departureDate,
+                ReturnDate = returnDate,
+                Passengers = passengers,
+                DirectOnly = directOnly,
+                CabinClass = cabinClass
+            };
+
+            if (!_validaciones.IsAValidSearch(request))
+            {
+                return BadRequest("Parámetros inválidos.");
+            }
+
+            var d   = departureDate.Value.Date;
+            var rd  = returnDate.Value.Date;
+            var baseQuery = _context.Flights.AsQueryable();
+
+            baseQuery = baseQuery.Where(f => f.DepartureTime >= d && f.DepartureTime < d.AddDays(1))
+                                 .Where(f => EF.Functions.Like(f.Origin, $"%{origin}%"))
+                                 .Where(f => EF.Functions.Like(f.Destination, $"%{destination}%"))
+                                 .Where(f => f.IsDirect)
+                                 .Where(f => (f.Capacity - f.Bookings.Count() >= passengers.Value))
+                                 .Where(f => f.CabinClass == cabinClass);
+            var outboundQuery = baseQuery.OrderBy(f => f.DepartureTime).Take(10);
+
+            var outbound = await outboundQuery
+                        .Select(f => new FlightDto
+                        {
+                            Id = f.Id,
+                            Origin = f.Origin,
+                            Destination = f.Destination,
+                            DepartureTime = f.DepartureTime,
+                            AvailableSeats = f.Capacity - f.Bookings.Count(),
+                            CabinClass = f.CabinClass
+                        }).ToListAsync();
+
+            if (tripType.ToLower() == "roundtrip")
+            {
+                baseQuery = baseQuery.Where(f => f.DepartureTime >= rd && f.DepartureTime < rd.AddDays(1));
+
+                var inboundQuery = baseQuery.OrderBy(f => f.DepartureTime).Take(10);
+
+                var inbound = await inboundQuery
+                            .Select(f => new FlightDto
+                            {
+                                Id = f.Id,
+                                Origin = f.Origin,
+                                Destination = f.Destination,
+                                DepartureTime = f.DepartureTime,
+                                ReturnTime = f.ReturnTime,
+                                AvailableSeats = f.Capacity - f.Bookings.Count(),
+                                CabinClass = f.CabinClass
                             }).ToListAsync();
 
                 if (inbound != null)

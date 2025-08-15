@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using FlightData.Data;
 using FlightApi.Middlewares;
+using FlightApi.Utils;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,6 +30,10 @@ builder.Services.AddDbContext<AppDbContext>(options =>
        .GetConnectionString("DefaultConnection") ??
        "Data Source=FlightDb.db")
 );
+
+// Inyeccion de dependencias
+builder.Services.AddScoped<IValidaciones, Validaciones>();
+
 
 var app = builder.Build();
 
