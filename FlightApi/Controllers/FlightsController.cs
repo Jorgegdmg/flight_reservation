@@ -13,16 +13,14 @@ namespace FlightApi.Controllers
     public class FlightsController : ControllerBase
     {
         private readonly AppDbContext _context;
-        private readonly IValidaciones _validaciones;
 
-        public FlightsController(AppDbContext context, IValidaciones validaciones)
+        public FlightsController(AppDbContext context)
         {
             _context = context;
-            _validaciones = validaciones;
         }
 
         // CRUD
-        [HttpGet]
+        [HttpGet("GetFlights")]
         public async Task<ActionResult<IEnumerable<FlightDto>>> GetFlights()
         {
             var flights = await _context.Flights
@@ -33,7 +31,7 @@ namespace FlightApi.Controllers
                     Destination = f.Destination,
                     DepartureTime = f.DepartureTime,
                     Capacity = f.Capacity,
-                    AvailableSeats = f.Capacity - f.Bookings.Count(), // calculado
+                    AvailableSeats = f.Capacity - f.Bookings.Count(),
                     IsDirect = f.IsDirect,
                     CabinClass = f.CabinClass
                 })
@@ -50,7 +48,7 @@ namespace FlightApi.Controllers
         }
 
 
-        [HttpGet("{id}")]
+        [HttpGet("GetFlight/:{id}")]
         public async Task<ActionResult<FlightDto>> GetFlight(int id)
         {
             var flight = await _context.Flights.FindAsync(id);
@@ -69,199 +67,86 @@ namespace FlightApi.Controllers
             };
         }
 
-        [HttpGet("search")]
-        public async Task<ActionResult<object>> Search(
-            string? origin = null,
-            string? destination = null,
-            DateTime? departureDate = null,
-            DateTime? returnDate = null,
-            string tripType = "roundtrip",
-            int? passengers = null,
-            bool? directOnly = null,
-            string? cabinClass = null)
+        [HttpGet("FlightSearch")]
+        public async Task<ActionResult<object>> FlightSearch(
+            string origin,
+            string destination,
+            DateTime departureDate,
+            DateTime? returnDate,
+            string tripType,
+            int passengers,
+            bool directOnly,
+            string cabinClass)
         {
- 
-            var request = new SearchRequest
-            {
-                Origin = origin,
-                Destination = destination,
-                DepartureDate = departureDate,
-                ReturnDate = returnDate,
-                Passengers = passengers,
-                DirectOnly = directOnly,
-                CabinClass = cabinClass
-            };
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
-            if (!_validaciones.IsAValidSearch(request))
-            {
-                return BadRequest("Parámetros inválidos.");
-            }
+            if (tripType.ToLower() != "roundtrip" && tripType.ToLower() != "oneway")
+                return BadRequest("Tipo de viaje inválido.");
 
-            var baseQuery = _context.Flights.AsQueryable();
+            // OUTBOUND
+            var d = departureDate.Date;
+            var outboundQuery = _context.Flights.AsQueryable()
+                .Where(f => f.DepartureTime >= d && f.DepartureTime < d.AddDays(1))
+                .Where(f => EF.Functions.Like(f.Origin, $"%{origin}%"))
+                .Where(f => EF.Functions.Like(f.Destination, $"%{destination}%"))
+                .Where(f => f.Capacity - f.Bookings.Count() >= passengers)
+                .Where(f => EF.Functions.Like(f.CabinClass, $"%{cabinClass}%"));
 
-
-            if (!string.IsNullOrWhiteSpace(origin))
-            {
-                baseQuery = baseQuery.Where(f => EF.Functions.Like(f.Origin, $"%{origin}%"));
-            }
-            if (!string.IsNullOrWhiteSpace(destination))
-            {
-                baseQuery = baseQuery.Where(f => EF.Functions.Like(f.Destination, $"%{destination}%"));
-            }
-            if (departureDate.HasValue)
-            {
-                var d = departureDate.Value.Date;
-                baseQuery = baseQuery.Where(f => f.DepartureTime >= d && f.DepartureTime < d.AddDays(1));
-            }
-            if (directOnly == true)
-            {
-                baseQuery = baseQuery.Where(f => f.IsDirect);
-            }
-            if (passengers.HasValue)
-            {
-                baseQuery = baseQuery.Where(f => (f.Capacity - f.Bookings.Count() >= passengers.Value));
-            }
-            if (!string.IsNullOrWhiteSpace(cabinClass))
-            {
-                baseQuery = baseQuery.Where(f => f.CabinClass == cabinClass);
-            }
-
-            var outboundQuery = baseQuery.OrderBy(f => f.DepartureTime).Take(10);
+            if (directOnly)
+                outboundQuery = outboundQuery.Where(f => f.IsDirect);
 
             var outbound = await outboundQuery
-                        .Select(f => new FlightDto
-                        {
-                            Id = f.Id,
-                            Origin = f.Origin,
-                            Destination = f.Destination,
-                            DepartureTime = f.DepartureTime,
-                            AvailableSeats = f.Capacity - f.Bookings.Count(),
-                            CabinClass = f.CabinClass
-                        }).ToListAsync();
-
-            if (string.Equals(tripType, "roundtrip", StringComparison.OrdinalIgnoreCase))
-            {
-                var returnQuery = _context.Flights.AsQueryable();
-
-                if (!string.IsNullOrWhiteSpace(destination))
+                .OrderBy(f => f.DepartureTime)
+                .Take(10)
+                .Select(f => new FlightDto
                 {
-                    returnQuery = returnQuery.Where(f => EF.Functions.Like(f.Origin, $"%{destination}%"));
-                }
-                if (!string.IsNullOrWhiteSpace(origin))
-                {
-                    returnQuery = returnQuery.Where(f => EF.Functions.Like(f.Destination, $"%{origin}%"));
-                }
-                if (directOnly == true)
-                {
-                    returnQuery = returnQuery.Where(f => f.IsDirect);
-                }
-                if (passengers.HasValue)
-                {
-                    returnQuery = returnQuery.Where(f => (f.Capacity - f.Bookings.Count() >= passengers.Value));
-                }
-                if (!string.IsNullOrWhiteSpace(cabinClass))
-                {
-                    returnQuery = returnQuery.Where(f => f.CabinClass == cabinClass);
-                }
+                    Id = f.Id,
+                    Origin = f.Origin,
+                    Destination = f.Destination,
+                    DepartureTime = f.DepartureTime,
+                    AvailableSeats = f.Capacity - f.Bookings.Count(),
+                    CabinClass = f.CabinClass
+                }).ToListAsync();
 
-                var rd = returnDate.Value.Date;
-                returnQuery = returnQuery.Where(f => f.DepartureTime >= rd && f.DepartureTime < rd.AddDays(1));
-                
-
-                var inboundQuery = returnQuery.OrderBy(f => f.DepartureTime).Take(10);
-
-                var inbound = await inboundQuery
-                            .Select(f => new FlightDto
-                            {
-                                Id = f.Id,
-                                Origin = f.Origin,
-                                Destination = f.Destination,
-                                DepartureTime = f.DepartureTime,
-                                AvailableSeats = f.Capacity - f.Bookings.Count()
-                            }).ToListAsync();
-
-                if (inbound != null)
-                    return Ok(new { outbound, inbound });
-            }
-            return Ok(new { outbound });
-        }
-
-        [HttpGet]
-        public async Task<ActionResult<object>> FlightSearchSearch(
-            string? origin = null,
-            string? destination = null,
-            DateTime? departureDate = null,
-            DateTime? returnDate = null,
-            string tripType = "roundtrip",
-            int? passengers = null,
-            bool? directOnly = null,
-            string? cabinClass = null)
-        {
-
-            var request = new SearchRequest
-            {
-                Origin = origin,
-                Destination = destination,
-                DepartureDate = departureDate,
-                ReturnDate = returnDate,
-                Passengers = passengers,
-                DirectOnly = directOnly,
-                CabinClass = cabinClass
-            };
-
-            if (!_validaciones.IsAValidSearch(request))
-            {
-                return BadRequest("Parámetros inválidos.");
-            }
-
-            var d   = departureDate.Value.Date;
-            var rd  = returnDate.Value.Date;
-            var baseQuery = _context.Flights.AsQueryable();
-
-            baseQuery = baseQuery.Where(f => f.DepartureTime >= d && f.DepartureTime < d.AddDays(1))
-                                 .Where(f => EF.Functions.Like(f.Origin, $"%{origin}%"))
-                                 .Where(f => EF.Functions.Like(f.Destination, $"%{destination}%"))
-                                 .Where(f => f.IsDirect)
-                                 .Where(f => (f.Capacity - f.Bookings.Count() >= passengers.Value))
-                                 .Where(f => f.CabinClass == cabinClass);
-            var outboundQuery = baseQuery.OrderBy(f => f.DepartureTime).Take(10);
-
-            var outbound = await outboundQuery
-                        .Select(f => new FlightDto
-                        {
-                            Id = f.Id,
-                            Origin = f.Origin,
-                            Destination = f.Destination,
-                            DepartureTime = f.DepartureTime,
-                            AvailableSeats = f.Capacity - f.Bookings.Count(),
-                            CabinClass = f.CabinClass
-                        }).ToListAsync();
-
+            // INBOUND (solo roundtrip)
             if (tripType.ToLower() == "roundtrip")
             {
-                baseQuery = baseQuery.Where(f => f.DepartureTime >= rd && f.DepartureTime < rd.AddDays(1));
+                if (!returnDate.HasValue)
+                    return BadRequest("Debe indicar returnDate para viajes de ida y vuelta.");
 
-                var inboundQuery = baseQuery.OrderBy(f => f.DepartureTime).Take(10);
+                var rd = returnDate.Value.Date;
+                var inboundQuery = _context.Flights.AsQueryable()
+                    .Where(f => f.DepartureTime >= rd && f.DepartureTime < rd.AddDays(1))
+                    .Where(f => EF.Functions.Like(f.Origin, $"%{destination}%"))
+                    .Where(f => EF.Functions.Like(f.Destination, $"%{origin}%"))
+                    .Where(f => f.Capacity - f.Bookings.Count() >= passengers)
+                    .Where(f => EF.Functions.Like(f.CabinClass, $"%{cabinClass}%"));
+
+                if (directOnly)
+                    inboundQuery = inboundQuery.Where(f => f.IsDirect);
 
                 var inbound = await inboundQuery
-                            .Select(f => new FlightDto
-                            {
-                                Id = f.Id,
-                                Origin = f.Origin,
-                                Destination = f.Destination,
-                                DepartureTime = f.DepartureTime,
-                                ReturnTime = f.ReturnTime,
-                                AvailableSeats = f.Capacity - f.Bookings.Count(),
-                                CabinClass = f.CabinClass
-                            }).ToListAsync();
+                    .OrderBy(f => f.DepartureTime)
+                    .Take(10)
+                    .Select(f => new FlightDto
+                    {
+                        Id = f.Id,
+                        Origin = f.Origin,
+                        Destination = f.Destination,
+                        DepartureTime = f.DepartureTime,
+                        AvailableSeats = f.Capacity - f.Bookings.Count(),
+                        CabinClass = f.CabinClass
+                    }).ToListAsync();
 
-                if (inbound != null)
-                    return Ok(new { outbound, inbound });
+                return Ok(new { outbound, inbound });
             }
+
             return Ok(new { outbound });
         }
 
-        [HttpPost]
+
+        [HttpPost("CreateFlight")]
         public async Task<ActionResult<FlightDto>> CreateFlight(CreateFlightDto dto)
         {
 
@@ -309,7 +194,7 @@ namespace FlightApi.Controllers
             return CreatedAtAction(nameof(GetFlight), new { Id = flight.Id }, result);
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("UpdateFlight/:{id}")]
         public async Task<IActionResult> UpdateFlight(int id, CreateFlightDto dto)
         {
             // Buscamos el id
@@ -330,7 +215,7 @@ namespace FlightApi.Controllers
             return NoContent();
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("DeleteFlight/:{id}")]
         public async Task<IActionResult> DeleteFlight(int id)
         {
             // Buscamos el id

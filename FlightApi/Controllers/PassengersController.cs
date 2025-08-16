@@ -17,7 +17,7 @@ namespace FlightApi.Controllers
             _context = context;
         }
 
-        [HttpGet]
+        [HttpGet("GetPassengers")]
         public async Task<ActionResult<IEnumerable<PassengerDto>>> GetPassengers()
         {
             var list = await _context.Passengers
@@ -32,7 +32,7 @@ namespace FlightApi.Controllers
             return Ok(list);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("GetPassenger/:{id}")]
         public async Task<ActionResult<PassengerDto>> GetPassenger(int id)
         {
             var p = await _context.Passengers.FindAsync(id);
@@ -46,7 +46,7 @@ namespace FlightApi.Controllers
             };
         }
 
-        [HttpPost]
+        [HttpPost("CreatePassenger")]
         public async Task<ActionResult<PassengerDto>> CreatePassenger(CreatePassengerDto dto)
         {
             var passenger = new Passenger
@@ -68,7 +68,7 @@ namespace FlightApi.Controllers
             return CreatedAtAction(nameof(GetPassenger), new { id = passenger.Id }, result);
 
         }
-        [HttpPut("{id}")]
+        [HttpPut("UpdatePassenger/:{id}")]
         public async Task<ActionResult<PassengerDto>> UpdatePassenger(int id, CreatePassengerDto dto)
         {
             // Buscamos al pasajero
@@ -84,7 +84,7 @@ namespace FlightApi.Controllers
             return NoContent();
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("DeletePassenger/:{id}")]
         public async Task<ActionResult<PassengerDto>> DeletePassenger(int id)
         {
             // Buscamos el pasajero

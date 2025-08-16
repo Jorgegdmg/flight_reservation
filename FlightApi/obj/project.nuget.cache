@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "F1imUmvgTiA=",
+  "dgSpecHash": "tw8uXZpJUE0=",
   "success": true,
-  "projectFilePath": "D:\\proyectos_.NET\\proyecto_reserva_vuelos\\flight-reservation\\FlightApi\\FlightApi.csproj",
+  "projectFilePath": "D:\\proyectos_.net\\proyecto_reserva_vuelos\\flight-reservation\\FlightApi\\FlightApi.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Carlos\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",
     "C:\\Users\\Carlos\\.nuget\\packages\\microsoft.aspnetcore.openapi\\9.0.7\\microsoft.aspnetcore.openapi.9.0.7.nupkg.sha512",

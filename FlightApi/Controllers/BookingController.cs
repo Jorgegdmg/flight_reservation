@@ -17,7 +17,7 @@ namespace FlightApi.Controllers
             _context = context;
         }
 
-        [HttpGet]
+        [HttpGet("GetBookings")]
         public async Task<ActionResult<IEnumerable<BookingDto>>> GetBookings()
         {
             var list = await _context.Bookings
@@ -39,7 +39,7 @@ namespace FlightApi.Controllers
             return Ok(list);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("GetBooking/:{id}")]
         public async Task<ActionResult<BookingDto>> GetBooking(int id)
         {
             // Buscamos la reserva
@@ -64,7 +64,7 @@ namespace FlightApi.Controllers
             };
         }
 
-        [HttpPost]
+        [HttpPost("CreateBooking")]
         public async Task<ActionResult<BookingDto>> CreateBooking(CreateBookingDto dto)
         {
             // Validamos la existencia del vuelo y del pasajero
@@ -106,7 +106,7 @@ namespace FlightApi.Controllers
             return CreatedAtAction(nameof(GetBooking), new { id = booking.Id }, result);
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("UpdateBooking/:{id}")]
         public async Task<IActionResult> UpdateBooking(int id, CreateBookingDto dto)
         {
             // Buscamos la reserva
@@ -132,7 +132,7 @@ namespace FlightApi.Controllers
             return NoContent();
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("DeleteBooking/:{id}")]
         public async Task<IActionResult> DeleteBooking(int id)
         {
             // Buscamos la reserva

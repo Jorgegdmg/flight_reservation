@@ -4,6 +4,6 @@ namespace FlightApi.Utils
 {
     public interface IValidaciones
     {
-        bool IsAValidSearch(SearchRequest request);
+        public bool IsAValidSearch(SearchRequest request, string tripType);
     }
 }

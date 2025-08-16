@@ -3610,11 +3610,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\proyectos_.NET\\proyecto_reserva_vuelos\\flight-reservation\\FlightApi\\FlightApi.csproj",
+      "projectUniqueName": "D:\\proyectos_.net\\proyecto_reserva_vuelos\\flight-reservation\\FlightApi\\FlightApi.csproj",
       "projectName": "FlightApi",
-      "projectPath": "D:\\proyectos_.NET\\proyecto_reserva_vuelos\\flight-reservation\\FlightApi\\FlightApi.csproj",
+      "projectPath": "D:\\proyectos_.net\\proyecto_reserva_vuelos\\flight-reservation\\FlightApi\\FlightApi.csproj",
       "packagesPath": "C:\\Users\\Carlos\\.nuget\\packages\\",
-      "outputPath": "D:\\proyectos_.NET\\proyecto_reserva_vuelos\\flight-reservation\\FlightApi\\obj\\",
+      "outputPath": "D:\\proyectos_.net\\proyecto_reserva_vuelos\\flight-reservation\\FlightApi\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -3635,8 +3635,8 @@
         "net9.0": {
           "targetAlias": "net9.0",
           "projectReferences": {
-            "D:\\proyectos_.NET\\proyecto_reserva_vuelos\\flight-reservation\\FlightData\\FlightData.csproj": {
-              "projectPath": "D:\\proyectos_.NET\\proyecto_reserva_vuelos\\flight-reservation\\FlightData\\FlightData.csproj"
+            "D:\\proyectos_.net\\proyecto_reserva_vuelos\\flight-reservation\\FlightData\\FlightData.csproj": {
+              "projectPath": "D:\\proyectos_.net\\proyecto_reserva_vuelos\\flight-reservation\\FlightData\\FlightData.csproj"
             }
           }
         }
