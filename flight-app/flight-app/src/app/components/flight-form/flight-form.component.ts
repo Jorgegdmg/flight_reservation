@@ -53,9 +53,10 @@ export class FlightFormComponent implements OnInit {
 
   onSubmit(): void {
     if(this.form.valid){
-      console.log(this.form.value);   
+      console.log(this.form.value); 
     } else {
       console.log("El formulario tiene campos sin rellenar.")
+      window.alert("El formulario tiene campos sin rellenar.")
     }
   }
 
