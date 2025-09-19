@@ -6,12 +6,14 @@ import { FlightListComponent } from './components/flight-list/flight-list.compon
 import { ReactiveFormsModule } from '@angular/forms';
 import { FlightFormComponent } from './components/flight-form/flight-form.component';
 import { AppRoutingModule } from "./app-routing.module";
+import { FlightGridComponent } from './components/flight-grid/flight-grid.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     FlightListComponent,
-    FlightFormComponent
+    FlightFormComponent,
+    FlightGridComponent
      
   ],
   imports: [

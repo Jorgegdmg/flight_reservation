@@ -1,0 +1,45 @@
+<!-- Contenedor de la tabla -->
+<div class="table-container">
+  <!-- Tabla de vuelos -->
+  <table class="flight-table" aria-label="Tabla de vuelos">
+    <thead>
+      <tr>
+        <th>Id</th>
+        <th>Origin</th>
+        <th>Destination</th>
+        <th>Departure Time</th>
+        <th>Capacity</th>
+        <th>Available Seats</th>
+        <th>Direct</th>
+        <th>Cabin Class</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <!-- Si no hay vuelos mostramos una fila -->
+      <tr *ngIf="flights.length === 0">
+        <td colspan="8" class="empty">There are no flights available</td>
+      </tr>
+
+      <!-- Lista de vuelos -->
+      <tr *ngFor="let flight of flights; trackBy: trackById">
+        <td>{{ flight.Id }}</td>
+        <!-- Texto simple -->
+        <td>{{ flight.Origin }}</td>
+        <td>{{ flight.Destination }}</td>
+
+        <!-- Formateamos la fecha con el date pipe (dd/MM/yyyy HH:mm) -->
+        <td>{{ flight.DepartureTime | date:'dd/MM/yyyy HH:mm' }}</td>
+
+        <td>{{ flight.Capacity }}</td>
+        <td>{{ flight.AvailableSeats }}</td>
+
+        <!-- Booleano mostrado como Yes / Not -->
+        <td>{{ flight.IsDirect ? 'Yes' : 'Not' }}</td>
+
+        <td>{{ flight.CabinClass }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
